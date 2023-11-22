@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
+import { ContactDto } from './contacts.dto';
+import { AmocrmService } from 'src/amocrm/amocrm.service';
 
 @Injectable()
 export class ContactsService {
-  create(createContactDto: CreateContactDto) {
-    return 'This action adds a new contact';
-  }
+  constructor(private readonly amocrmService: AmocrmService) {}
 
-  findAll() {
-    return `This action returns all contacts`;
-  }
+  async get(dto: ContactDto) {
+    var contactId = await this.amocrmService.getContact(dto);
 
-  findOne(id: number) {
-    return `This action returns a #${id} contact`;
-  }
+    if (!contactId) {
+      const data = await this.amocrmService.createContact(dto);
+      contactId = data['_embedded']['contacts'][0]['id'];
 
-  update(id: number, updateContactDto: UpdateContactDto) {
-    return `This action updates a #${id} contact`;
-  }
+      await this.amocrmService.createLead(dto, contactId);
 
-  remove(id: number) {
-    return `This action removes a #${id} contact`;
+      return { message: 'Пользователь и сделка создана' };
+    }
+
+    await this.amocrmService.updateContact(dto, contactId);
+    await this.amocrmService.createLead(dto, contactId);
+
+    return { message: 'Сделка создана' };
   }
 }
