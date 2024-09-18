@@ -42,7 +42,3 @@
 ```bash
   npm run start:prod
 ```
-
-
-## Данные для входа в AmoCRM
-`qifbfu68qj@myinfoinc.com:testtask123`
